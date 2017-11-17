@@ -1,0 +1,67 @@
+10::ms => dur d;
+CvCam cam;
+Evdev joy;
+SinOsc s => Gain g => dac;
+Tadsr adsr => g;
+
+
+float target_freq;
+0::samp => dur remaining;
+float delta;
+/*
+spork ~{
+  while(true) {
+    if(remaining) {
+<<<delta>>>;
+      (s.freq() + delta) => s.freq;
+      remaining - samp => remaining;
+    }
+    samp => now;
+  }
+};
+*/
+3 => g.op;  
+.8 => s.amp;
+.6 => adsr.sus;
+Impulse imp ]=> adsr;
+1 => cam.show;
+// init joystick
+joy.index(5);
+fun void h_angle(Evdev joy, CvCam cam) {
+  while(true) {
+    joy => now;
+    while(joy.recv()) {
+      switch(joy.code) {
+        case 0:
+          cam.angle = -(joy.value - 127)/2.;
+          break;
+        case 1:
+<<<10::ms/samp>>>;
+<<<10::ms => remaining>>>;
+s.freq() - ((joy.value/255.) * 100) + 200 => delta;
+4800 /=> delta;
+          break;
+        case 2:
+          cam.scale = 1 - (joy.value/255.);
+          break;
+        case 290:
+          if(joy.value)
+            cam.show = !cam.show;
+          break;
+        case 288:
+          1 => imp.next;
+          break;
+        default:
+          <<<joy.code, joy.value>>>;
+      }
+    }
+  }
+}
+
+spork ~
+//h_angle(joy, cam);
+h_angle(joy, cam);
+//me.yield();
+//10::second => now;
+//<<<"end of time">>>;
+day => now;

@@ -1,10 +1,10 @@
 Evdev evdev;
-int i;
+10 => int i;
 while(true) {
-int ret;
-<<<evdev.index(i) => ret, i>>>;
-if(ret == -1)
-  break;
+  int ret;
+  <<<evdev.index(i) => ret, i>>>;
+  if(ret == -1)
+    break;
   <<<evdev.name()>>>;
   i++;
 }

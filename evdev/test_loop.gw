@@ -1,10 +1,14 @@
+int i, j, k;
 Evdev ev;
-if(ev.index(15) < 0)
+//if(ev.index(15) < 0)
+if(ev.index(5) < 0)
   me.exit();
-ev.name() @=> string @s;
-<<<s>>>;
-while(true) {
-  ev => now;
-  while(ev.recv())
-    <<<ev.type, ev.code, ev.value>>>;
+fun void test_evdev(Evdev ev) {
+  while(true) {
+    ev => now;
+    while(ev.recv())
+      <<<ev.type, ev.code, ev.value>>>;
+    <<<"change sample">>>;
+  }
 }
+ev => test_evdev;

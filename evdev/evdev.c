@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 #include <pthread.h>
 #include <string.h>
 #include <libevdev/libevdev.h>
@@ -41,6 +44,7 @@ typedef struct {
   pthread_t thread;
   pthread_mutex_t mutex;
   Vector args;
+  m_uint pos;
 } EvdevInfo;
 
 static CTOR(evdev_base_ctor) {
@@ -62,6 +66,7 @@ static DTOR(evdev_dtor) {
   free_vector(info->args);
   free(INFO(o));
 }
+
 static void* evdev_process(void* arg) {
   int rc;
   struct input_event event;
@@ -74,19 +79,21 @@ static void* evdev_process(void* arg) {
   curr.revents = 0;
   do {
     poll(&curr, 1, -1);
-    rc = libevdev_next_event(info->evdev, LIBEVDEV_READ_FLAG_NORMAL, &event);
+    rc = libevdev_next_event(info->evdev, LIBEVDEV_READ_FLAG_BLOCKING, &event);
     if(rc == 0 && event.type) {
-      pthread_mutex_lock(&info->mutex);
       EvdevArg* ev = malloc(sizeof(EvdevArg));
       ev->type  = event.type;
       ev->code  = event.code;
       ev->value = event.value;
+      pthread_mutex_lock(&info->mutex);
       vector_add(info->args, (vtype)ev);
-      broadcast(o);
+//      if(shred->vm_ref->sp->pos != info->pos) {
+//        info->pos = shred->vm_ref->sp->pos;
+        broadcast(o);
       pthread_mutex_unlock(&info->mutex);
-      broadcast(o);
+//      }
     }
-  } while((rc == 1 || rc == 0 || rc == -11));
+  } while((rc == 1 || rc == 0 || rc == -EAGAIN));
   return NULL;
 }
 
@@ -104,8 +111,7 @@ static MFUN(evdev_index) {
     info->evdev = NULL;
     info->index = -1;
   }
-  sprintf(c, "%s%i", EVDEV_PREFIX, index);
-  printf("%s%i\n", EVDEV_PREFIX, index);
+  sprintf(c, "%s%li", EVDEV_PREFIX, index);
   if((info->fd = open((const char*)c, O_RDONLY|O_NONBLOCK)) == -1) {
     err_msg(INSTR_, 0, "EVDEV: no such event");
     return;
@@ -128,18 +134,17 @@ static MFUN(evdev_recv) {
   Vector v= info->args;
   pthread_mutex_lock(&info->mutex);
   EvdevArg* arg = (EvdevArg*)vector_front(v);
+  vector_rem(v, 0);
+  pthread_mutex_unlock(&info->mutex);
   if(!arg) {
     *(m_uint*)RETURN = 0;
-  pthread_mutex_unlock(&info->mutex);
     return;
   }
   TYPE(o)   = arg->type;
   CODE(o)   = arg->code;
   VALUE(o)  = arg->value;
-  vector_rem(v, 0);
   free(arg);
   *(m_uint*)RETURN = 1;
-  pthread_mutex_unlock(&info->mutex);
 }
 
 static MFUN(evdev_get_index) {
