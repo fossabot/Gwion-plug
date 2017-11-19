@@ -86,8 +86,8 @@ CTOR(cvcam_ctor) {
 
 void* cvcam_dtor_process(void* data) {
   is_running = 0;
-  pthread_cancel(&cvcam_thread);
-  pthread_join(&cvcam_thread);
+  pthread_cancel(cvcam_thread);
+  pthread_join(cvcam_thread, NULL);
   cvReleaseCapture(&cap);
 }
 
