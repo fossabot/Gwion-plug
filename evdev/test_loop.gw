@@ -1,0 +1,14 @@
+int i, j, k;
+Evdev ev;
+//if(ev.index(15) < 0)
+if(ev.index(13) < 0)
+  me.exit();
+fun void test_evdev(Evdev ev) {
+  while(true) {
+    ev => now;
+    while(ev.recv())
+      <<<ev.type, ev.code, ev.value>>>;
+    <<<"change sample">>>;
+  }
+}
+ev => test_evdev;

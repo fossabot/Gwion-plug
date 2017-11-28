@@ -1,0 +1,63 @@
+"Mega World USB Game Controllers" => string joy_name;
+CvCam cam;
+Evdev joy;
+
+fun void find_joystick(string name) {
+  int i;
+  while(true) {
+    if(joy.index(i) == - 1)
+      break;
+    if(joy.name() == name)
+      return;
+    i++;
+  }
+  <<<"No Matching Joystick found.", "">>>;
+  me.exit();
+}
+
+fun void h_angle(Evdev joy, CvCam cam) {
+  now + 2::second => time t;
+  1 => int loop;
+  while(loop) {
+    joy => now;
+    while(joy.recv()) {
+      switch(joy.code) {
+        case 0:
+          cam.x = joy.value - 128 $ int;
+          break;
+        case 1:
+          cam.y = -(joy.value - 127)/2.;
+          break;
+        case 2:
+          cam.scale = 1 - (joy.value/255.);
+          break;
+        case 4: // ????
+          break;
+        case 16: // hat x
+          break;
+        case 17: // hat y
+          break;
+        case 289: // boutton central
+          0 => loop;
+          break;
+        case 290: // button 1
+          if(joy.value)
+            !cam.trounoir => cam.trounoir;
+          break;
+        case 291: // button 3
+        <<<"show">>>;
+          if(joy.value)
+            /*!cam.show => cam.show;*/
+            cam.show = !cam.show;
+          break;
+        case 288: // gachette
+          break;
+        default:
+          <<<joy.code, joy.value>>>;
+      }
+    }
+  }
+}
+
+joy_name => find_joystick;
+h_angle(joy, cam);
