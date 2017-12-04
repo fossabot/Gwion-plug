@@ -22,7 +22,7 @@ class Nano {
 };
 
 class Loup {
-  VideoCapture cap;
+  cv::VideoCapture cap;
   std::vector<Fx*> fx;
   pthread_t thread;
   Joy  m_joy;

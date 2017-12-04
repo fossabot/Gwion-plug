@@ -9,7 +9,7 @@ void* loup_process(void* data) {
   while(true) {
     if(!loup->run())
       return NULL;
-    waitKey(1000/25);
+    waitKey(100); // was 1000/25
   }
   return NULL;
 }

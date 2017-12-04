@@ -1,17 +1,11 @@
 Loup loup;
-//"sobel" => loup.add => int sobel;
 "ciel" => loup.add => int ciel;
-//"bg" => loup.add => int bg;
 "trounoir" => loup.add => int trounoir;
-//"cartoon1" => loup.add => int cartoon1;
-//"vaisseau" => loup.add => int vaisseau;
 "vaisseau3" => loup.add => int vaisseau;
 int tn, ci, vs;
 
-"nanoKONTROL2 MIDI 1" => string min_name;
 "Mega World USB Game Controllers" => string joy_name;
 Evdev joy;
-MidiIn min;
 
 fun void find_joystick(string name) {
   int i;
@@ -23,21 +17,6 @@ fun void find_joystick(string name) {
     i++;
   }
   <<<"No Matching Joystick found.", "">>>;
-  me.exit();
-}
-
-fun void find_nano(string name) {
-  int i;
-  while(true) {
-    if(min.open(i) == -1)
-      break;
-    if(min.name() == name) {
-      if(min.open(i+1) != -1)
-        return;
-    }
-    i++;
-  }
-  <<<"No Matching Midi Device found.", "">>>;
   me.exit();
 }
 
@@ -93,26 +72,8 @@ fun void play(Evdev joy, Loup loup) {
   }
 }
 
-fun void mix_control() {
-  while(true) {
-    min => now;
-    while(min.recv()) {
-      min.read();
-      <<<"test", min.status, min.data1, min.data2>>>;
-    }
-  }
-}
-
-// disable sobel
-//loup.set(sobel, 0);
-//loup.set(cartoon1, 0);
-//loup.set(bg, 0);
 loup.set(vaisseau, 0);
 loup.set(trounoir, 0);
 loup.set(ciel, 0);
-min_name => find_nano;
 joy_name => find_joystick;
-spork ~mix_control();
-spork ~play(joy, loup);
-day => now;
-//5::minute=> now;
+play(joy, loup);

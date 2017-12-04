@@ -11,6 +11,8 @@
 #include "sobel.hpp"
 #include "cartoon1.hpp"
 #include "vaisseau.hpp"
+#include "vaisseau2.hpp"
+#include "vaisseau3.hpp"
 
 #define LOUP(o) (*(Loup**)(o->data + o_loup_cam))
 static struct Type_ t_loup = { (m_str)"Loup", SZ_INT, &t_object };
@@ -65,6 +67,10 @@ MFUN(loup_fx_add) {
     ret = LOUP(o)->add(new Cartoon1);
   else if(str == "vaisseau")
     ret = LOUP(o)->add(new Vaisseau);
+  else if(str == "vaisseau2")
+    ret = LOUP(o)->add(new Vaisseau2);
+  else if(str == "vaisseau3")
+    ret = LOUP(o)->add(new Vaisseau3);
   release(obj, shred);
   *(m_int*)RETURN = ret;
 }
@@ -78,40 +84,40 @@ MFUN(loup_fx_set) {
 extern "C" {
 IMPORT {
   CHECK_BB(importer_class_ini(importer, &t_loup, loup_ctor, loup_dtor))
-  
+
   CHECK_BB(importer_item_ini(importer, "int", "@cam"))
   CHECK_BB((o_loup_cam = importer_item_end(importer, ae_flag_member, NULL)))
- 
+
   CHECK_BB(importer_func_ini(importer, "float", "scale", loup_scale_get))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_func_ini(importer, "float", "scale", loup_scale_set))
     CHECK_BB(importer_func_arg(importer, "float", "f"))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_func_ini(importer, "float", "x", loup_x_get))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_func_ini(importer, "float", "x", loup_x_set))
     CHECK_BB(importer_func_arg(importer, "float", "f"))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_func_ini(importer, "float", "y", loup_y_get))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_func_ini(importer, "float", "y", loup_y_set))
     CHECK_BB(importer_func_arg(importer, "float", "f"))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_func_ini(importer, "int", "add", loup_fx_add))
     CHECK_BB(importer_func_arg(importer, "string", "fx"))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_func_ini(importer, "int", "set", loup_fx_set))
     CHECK_BB(importer_func_arg(importer, "int", "index"))
     CHECK_BB(importer_func_arg(importer, "int", "state"))
   CHECK_BB(importer_func_end(importer, ae_flag_member))
-  
+
   CHECK_BB(importer_class_end(importer));
   return 1;
 }
